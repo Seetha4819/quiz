@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1521747116042-5a810fda9664') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .browser {
+            width: 450px;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .browser-header {
+            background-color: #f1f1f1;
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .browser-header .circles {
+            display: flex;
+            gap: 5px;
+        }
+
+        .circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .circle.red {
+            background-color: #ff605c;
+        }
+
+        .circle.yellow {
+            background-color: #ffbd44;
+        }
+
+        .circle.green {
+            background-color: #00ca4e;
+        }
+
+        .browser-header .title {
+            margin-left: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .quiz-container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .answer {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .answer:hover {
+            background-color: #0056b3;
+        }
+
+        .answer.correct {
+            background-color: #28a745;
+        }
+
+        .answer.incorrect {
+            background-color: #dc3545;
+        }
+
+        #submit {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit:hover {
+            background-color: #218838;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="browser">
+        <div class="browser-header">
+            <div class="circles">
+                <div class="circle red"></div>
+                <div class="circle yellow"></div>
+                <div class="circle green"></div>
+            </div>
+            <div class="title">Quiz App - Browser Mode</div>
+        </div>
+        <div class="quiz-container" id="quiz">
+            <div id="question" class="question"></div>
+            <div class="answers">
+                <button class="answer" id="a" onclick="selectAnswer('a')"></button>
+                <button class="answer" id="b" onclick="selectAnswer('b')"></button>
+                <button class="answer" id="c" onclick="selectAnswer('c')"></button>
+                <button class="answer" id="d" onclick="selectAnswer('d')"></button>
+            </div>
+            <button id="submit" onclick="nextQuestion()" disabled>Next</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+    <script>
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                a: "Berlin",
+                b: "Madrid",
+                c: "Paris",
+                d: "Rome",
+                correct: "c"
+            },
+            {
+                question: "Which language runs in a web browser?",
+                a: "Java",
+                b: "C",
+                c: "Python",
+                d: "JavaScript",
+                correct: "d"
+            },
+            {
+                question: "What does CSS stand for?",
+                a: "Central Style Sheets",
+                b: "Cascading Style Sheets",
+                c: "Cascading Simple Sheets",
+                d: "Cars SUVs Sailboats",
+                correct: "b"
+            },
+            {
+                question: "What does HTML stand for?",
+                a: "Hypertext Markup Language",
+                b: "Hypertext Markdown Language",
+                c: "Hyperloop Machine Language",
+                d: "Helicopters Terminals Motorboats Lamborghinis",
+                correct: "a"
+            },
+            {
+                question: "What year was JavaScript launched?",
+                a: "1996",
+                b: "1995",
+                c: "1994",
+                d: "None of the above",
+                correct: "b"
+            },
+            {
+                question: "Which company developed JavaScript?",
+                a: "Microsoft",
+                b: "Sun Microsystems",
+                c: "Netscape",
+                d: "Oracle",
+                correct: "c"
+            },
+            {
+                question: "Which HTML tag is used to define an internal style sheet?",
+                a: "<css>",
+                b: "<style>",
+                c: "<script>",
+                d: "<link>",
+                correct: "b"
+            },
+            {
+                question: "Which property is used to change the background color in CSS?",
+                a: "color",
+                b: "background-color",
+                c: "bgcolor",
+                d: "background",
+                correct: "b"
+            },
+            {
+                question: "Which symbol is used for comments in CSS?",
+                a: "// comment",
+                b: "/* comment */",
+                c: "<!-- comment -->",
+                d: "# comment",
+                correct: "b"
+            },
+            {
+                question: "Which is the correct way to link a JavaScript file?",
+                a: "<script src='file.js'>",
+                b: "<script href='file.js'>",
+                c: "<link src='file.js'>",
+                d: "<link href='file.js'>",
+                correct: "a"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        const answersStatus = [];
+
+        function loadQuiz() {
+            if (currentQuestion >= quizData.length) {
+                showResult();
+                return;
+            }
+
+            const currentQuizData = quizData[currentQuestion];
+            document.getElementById('question').innerText = currentQuizData.question;
+            document.getElementById('a').innerText = currentQuizData.a;
+            document.getElementById('b').innerText = currentQuizData.b;
+            document.getElementById('c').innerText = currentQuizData.c;
+            document.getElementById('d').innerText = currentQuizData.d;
+
+            // Reset button styles and disable the next button
+            document.querySelectorAll('.answer').forEach(button => {
+                button.classList.remove('correct', 'incorrect');
+                button.disabled = false;
+            });
+            document.getElementById('submit').disabled = true;
+        }
+
+        function selectAnswer(answer) {
+            const correct = quizData[currentQuestion].correct;
+            document.getElementById('submit').disabled = false;
+
+            document.querySelectorAll('.answer').forEach(button => {
+                button.disabled = true;
+                if (button.id === answer) {
+                    if (answer === correct) {
+                        button.classList.add('correct');
+                        score++;
+                        answersStatus.push("Correct");
+                    } else {
+                        button.classList.add('incorrect');
+                        answersStatus.push("Incorrect");
+                    }
+                } else if (button.id === correct) {
+                    button.classList.add('correct');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuiz();
+        }
+
+        function showResult() {
+            let resultHTML = `<h2>You answered ${score}/${quizData.length} questions correctly</h2>`;
+            answersStatus.forEach((status, index) => {
+                resultHTML += `<p>Question ${index + 1}: ${status}</p>`;
+            });
+            resultHTML += `<button onclick="location.reload()">Reload</button>`;
+            document.getElementById('quiz').innerHTML = resultHTML;
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
